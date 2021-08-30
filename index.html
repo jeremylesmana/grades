@@ -1,0 +1,47 @@
+<html>
+
+<head>
+  <title>Grade Calculator</title>
+  <script src="jquery-3.5.1.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link async rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="grade.js"></script>
+</head>
+
+<body>
+  <br><br>
+  <div class="ui segment text container center aligned">
+  <!-- main container in here -->
+      <h2 class="ui header">Grade Calculator</h2>
+      <span>Created by Jeremy Lesmana</span><br>
+      <span style="font-size:12px">Simple without all the fluff and ads</span>
+      <br><br>
+
+      <div class="identifier">
+        <span style="padding-left:20px;padding-right:30px;">Category</span>
+        <span>Grade(%)</span>
+        <span style="padding-left:10px;padding-right:10px;">Weight(%)</span>
+      </div>
+
+      <div id="rowsHere"></div><br>
+      Calculated Grade:<br>
+      <span id="resGrade" style="font-weight:900;font-size:20px;">0%</span>
+      <br><br>
+      <!-- preferred grade calculator starts here -->
+      Preferred Grade Calculator:<br>
+      <input type="range" min="1" max ="100" value="90" id="slider" oninput="sliderInput()" style="width:275px;">
+      <br>
+      <span class="ui input"><input id="sliderInput" type="number" style="width:80px" value="90" oninput="sliderTextInput()"></span><br>
+      You must get:
+      <span id="prefGrade" style="font-weight:900;font-size:20px;">0%</span>
+
+
+
+    <!-- main container ends here-->
+  </div>
+</body>
+
+
+</html>
