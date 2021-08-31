@@ -41,7 +41,6 @@ function calculate(){
   ecCalc = (Number(grdEC) * (Number(wgtEC) * 0.01));
   multiplier = (1/weightSum);
   gradeSum = Number(gradeSum) * Number(multiplier);
-  gradeSum = gradeSum;
   finalTotal = (Number(gradeSum) + ecCalc).toFixed(2) + '%'
 
   //Checking for color purposes
