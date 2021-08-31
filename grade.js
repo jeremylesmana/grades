@@ -9,9 +9,16 @@ $(document).ready(function() {
 function createRows() {
   for (let i = 1; i < 9; i++) {
     const outerDiv = document.createElement("div");
-    outerDiv.innerHTML = '<span class="ui input"><input id="cat"type="text" size="10"></span><span class="ui input"><input id="grd' + i + '" type="number" style="width:80px" oninput="calculate()"></span><span class="ui input"><input id="wgt' + i + '" type="number" style="width:80px" oninput="calculate()"></span>';
+    outerDiv.innerHTML = '<span class="ui input"><input id="cat"type="text" size="10">\
+    </span><span class="ui input"><input id="grd' + i + '" type="number" style="width:80px" oninput="calculate()">\
+    </span><span class="ui input"><input id="wgt' + i + '" type="number" style="width:80px" oninput="calculate()"></span>';
     document.getElementById("rowsHere").appendChild(outerDiv);
   }
+  ecRow = document.createElement("div");
+  ecRow.innerHTML = '<span class="ui input"><input style="background-color:#b4f0b4;" id="cat" type="text" size="10" value="Extra Credit*" readonly>\
+  </span><span class="ui input"><input id="grd-ec" type="number" style="background-color:#b4f0b4;width:80px" oninput="calculate()">\
+  </span><span class="ui input"><input id="wgt-ec" type="number" style="background-color:#b4f0b4;width:80px" oninput="calculate()"></span>';
+  document.getElementById("rowsHere").appendChild(ecRow);
 }
 
 function calculate(){
@@ -27,11 +34,12 @@ function calculate(){
 
     gradeSum = gradeSum + (grdNum * wgtDec);
 
-
-
   }
+  grdEC = document.getElementById('grd-ec').value;
+  wgtEC = document.getElementById('wgt-ec').value;
   multiplier = (1/weightSum);
-  gradeSum = gradeSum * multiplier;
+  gradeSum = Number(gradeSum) * Number(multiplier);
+  gradeSum = gradeSum + (Number(grdEC) * (Number(wgtEC) * 0.01));
   finalTotal = Number(gradeSum).toFixed(2) + '%'
 
   //Checking for color purposes

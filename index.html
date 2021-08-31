@@ -11,7 +11,7 @@
 </head>
 
 <body>
-  <br><br>
+  <br>
   <div class="ui segment text container center aligned">
   <!-- main container in here -->
       <h2 class="ui header">Grade Calculator</h2>
@@ -25,7 +25,8 @@
         <span style="padding-left:10px;padding-right:10px;">Weight(%)</span>
       </div>
 
-      <div id="rowsHere"></div><br>
+      <div id="rowsHere"></div>
+      <div style="font-size:12px;width:300px;margin:auto;">*Optional: Extra credit works differently because it doesn't count as a portion of your total weight of grades. Instead, it adds it on as it is 'extra' credit.</div><br>
       Calculated Grade:<br>
       <span id="resGrade" style="font-weight:900;font-size:20px;">0%</span>
       <br><br>
@@ -33,7 +34,7 @@
       Preferred Grade Calculator:<br>
       <input type="range" min="1" max ="100" value="90" id="slider" oninput="sliderInput()" style="width:275px;">
       <br>
-      <span class="ui input"><input id="sliderInput" type="number" style="width:80px" value="90" oninput="sliderTextInput()"></span><br>
+      <span class="ui input"><input id="sliderInput" type="number" style="width:80px" value="90" oninput="sliderTextInput()"></span> %<br>
       You must get:
       <span id="prefGrade" style="font-weight:900;font-size:20px;">0%</span>
 
