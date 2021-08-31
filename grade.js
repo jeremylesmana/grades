@@ -1,5 +1,6 @@
 var gradeSum;
 var weightSum;
+var ecCalc;
 
 $(document).ready(function() {
   createRows();
@@ -37,10 +38,11 @@ function calculate(){
   }
   grdEC = document.getElementById('grd-ec').value;
   wgtEC = document.getElementById('wgt-ec').value;
+  ecCalc = (Number(grdEC) * (Number(wgtEC) * 0.01));
   multiplier = (1/weightSum);
   gradeSum = Number(gradeSum) * Number(multiplier);
-  gradeSum = gradeSum + (Number(grdEC) * (Number(wgtEC) * 0.01));
-  finalTotal = Number(gradeSum).toFixed(2) + '%'
+  gradeSum = gradeSum;
+  finalTotal = (Number(gradeSum) + ecCalc).toFixed(2) + '%'
 
   //Checking for color purposes
   if(gradeSum>=90) {
@@ -77,7 +79,7 @@ function calcPref() {
   prefGrade = document.getElementById("sliderInput").value;
   topEq = Number(prefGrade) - (Number(gradeSum) * Number(weightSum));
   finalWorth = 1 - Number(weightSum);
-  needed = topEq/finalWorth;
+  needed = (topEq/finalWorth) - ecCalc;
 
   document.getElementById("prefGrade").innerHTML = needed.toFixed(2) + "%";
 
