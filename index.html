@@ -35,7 +35,7 @@
       <a style="color: #336196;padding: 10px;" href="https://www.linkedin.com/in/jeremylesmana/" target="_blank">LinkedIn</a>
     </div><br>
     <div style="font-size:12px;max-width:450px;margin:auto;">
-      You can enter decimals at all fields.
+      You can enter decimals at all fields.<br>Grade and weight are percentages (%).
     </div><br>
 
     <div id="rowsHere"></div>
@@ -86,10 +86,10 @@
 
       for (let i = 1; i < 9; i++) {
         rowsContainer.append(`
-          <div class="category-row" data-row="${i}">
-            <span class="ui input"><input class="cat" type="text" size="15"></span>
-            <span class="ui input"><input id="grd${i}" type="number" style="width:70px"></span>
-            <span class="ui input"><input id="wgt${i}" type="number" style="width:70px"></span>
+          <div class="category-row" data-row="${i}" style="padding-top:7px; padding-bottom:7px;">
+            <span class="ui input"><input class="cat" type="text" placeholder="Category" style="width:140px; font-size:14px;"></span>
+            <span class="ui input"><input id="grd${i}" type="number" placeholder="Grade" style="width:80px; font-size:14px;"></span>
+            <span class="ui input"><input id="wgt${i}" type="number" placeholder="Weight" style="width:80px; font-size:14px;"></span>
             
             <div class="ui checkbox">
               <input type="checkbox" class="detail-toggle"> 
@@ -120,9 +120,9 @@
 
       rowsContainer.append(`
         <br><div>
-          <span class="ui input"><input class="cat" style="background-color:#b4f0b4;" type="text" size="10" value="Extra Credit*" readonly></span>
-          <span class="ui input"><input id="grd-ec" type="number" style="background-color:#b4f0b4;width:70px"></span>
-          <span class="ui input"><input id="wgt-ec" type="number" style="background-color:#b4f0b4;width:70px"></span>
+          <span class="ui input"><input class="cat" style="background-color:#b4f0b4;font-size:14px;" type="text" size="10" value="Extra Credit*" readonly></span>
+          <span class="ui input"><input id="grd-ec" type="number" placeholder="Grade" style="font-size:14px;background-color:#b4f0b4;width:80px"></span>
+          <span class="ui input"><input id="wgt-ec" type="number" placeholder="Weight" style="font-size:14px;background-color:#b4f0b4;width:80px"></span>
         </div>
       `);
 
