@@ -34,19 +34,13 @@
       <a style="color: #966F33;padding: 10px;" href="https://buymeacoffee.com/jeremylesmana" target="_blank">Buy me coffee</a>
       <a style="color: #336196;padding: 10px;" href="https://www.linkedin.com/in/jeremylesmana/" target="_blank">LinkedIn</a>
     </div><br>
-    <div style="font-size:12px;width:450px;margin:auto;">
+    <div style="font-size:12px;max-width:450px;margin:auto;">
       You can enter decimals at all fields.
     </div><br>
 
-    <div class="identifier">
-      <span style="padding-left:20px;padding-right:35px;">Category</span>
-      <span>Grade(%)</span>
-      <span style="padding-left:10px;padding-right:70px;">Weight(%)</span>
-    </div>
-
     <div id="rowsHere"></div>
 
-    <div style="font-size:12px;width:450px;margin:auto;">
+    <div style="font-size:12px;max-width:450px;margin:auto;">
       *Optional: Extra credit works differently because it doesn't count as a portion of your total weight of grades. Instead, it adds it on as it is 'extra' credit.
     </div><br>
 
@@ -58,7 +52,7 @@
     Final Grade Calculator:<br>
     <input type="range" min="1" max="100" value="90" id="slider" style="width:200px;"><br>
     <span class="ui input"><input id="sliderInput" type="number" style="width:70px" value="90"></span> % Desired Overall Grade<br><br>
-    <div style="font-size:12px;width:450px;margin:auto;">
+    <div style="font-size:12px;max-width:450px;margin:auto;">
       You can use the final grade calculator to calculate what grade you need your remaining assignments to receive a desired overall grade.
       For example, if you want to calculate what you need on your Final Exam to get an A in the class, you can do so! Just fill in all the categories
       and make sure the weights total to 100%, and leave your last category grade blank (eg. Final Exam).
@@ -67,7 +61,7 @@
   </div><br>
   
   <div style="text-align: center;">
-    <img src="https://static.wikia.nocookie.net/sumikko-gurashi/images/6/69/Tokage.jpeg" width="40px"><br>
+    <img src="https://static.wikia.nocookie.net/sumikko-gurashi/images/6/69/Tokage.jpeg" width="50px"><br>
     Made mainly for Anne. You got this!
   </div><br><br>
 
@@ -93,14 +87,14 @@
       for (let i = 1; i < 9; i++) {
         rowsContainer.append(`
           <div class="category-row" data-row="${i}">
-            <span class="ui input"><input class="cat" type="text" size="10"></span>
-            <span class="ui input"><input id="grd${i}" type="number" style="width:80px"></span>
-            <span class="ui input"><input id="wgt${i}" type="number" style="width:80px"></span>
+            <span class="ui input"><input class="cat" type="text" size="15"></span>
+            <span class="ui input"><input id="grd${i}" type="number" style="width:70px"></span>
+            <span class="ui input"><input id="wgt${i}" type="number" style="width:70px"></span>
             
             <div class="ui checkbox">
               <input type="checkbox" class="detail-toggle"> 
               <label>Detailed</label>
-            </div>
+            </div><br>
             
             <div class="detail-inputs" style="display:none; max-width:450px; margin: auto;">
               <div>
@@ -125,12 +119,10 @@
       }
 
       rowsContainer.append(`
-        <div style="padding-right: 80px">
-          <span class="ui input">
-            <input class="cat" style="background-color:#b4f0b4;" type="text" size="10" value="Extra Credit*" readonly>
-          </span>
-          <span class="ui input"><input id="grd-ec" type="number" style="background-color:#b4f0b4;width:80px"></span>
-          <span class="ui input"><input id="wgt-ec" type="number" style="background-color:#b4f0b4;width:80px"></span>
+        <br><div>
+          <span class="ui input"><input class="cat" style="background-color:#b4f0b4;" type="text" size="10" value="Extra Credit*" readonly></span>
+          <span class="ui input"><input id="grd-ec" type="number" style="background-color:#b4f0b4;width:70px"></span>
+          <span class="ui input"><input id="wgt-ec" type="number" style="background-color:#b4f0b4;width:70px"></span>
         </div>
       `);
 
