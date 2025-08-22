@@ -1,5 +1,4 @@
 <html>
-
 <head>
   <title>Grade Calculator</title>
   <script src="jquery-3.5.1.min.js"></script>
@@ -7,43 +6,197 @@
   <link async rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
   <script async src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="grade.js"></script>
+
+  <style>
+    .detail-inputs { margin-top: 6px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; }
+    .needed-result { margin-top: 6px; font-weight: 600; }
+  </style>
 </head>
 
 <body>
   <br>
   <div class="ui segment text container center aligned">
-  <!-- main container in here -->
-      <h2 class="ui header">Grade Calculator</h2>
-      <span>Created by Jeremy Lesmana</span><br>
-      <span style="font-size:12px">Simple without all the fluff and ads</span>
-      <br><br>
+    <h2 class="ui header">Grade Calculator</h2>
+    <span>Created by Jeremy Lesmana</span><br>
+    <span style="font-size:12px">Simple without all the fluff and ads</span>
+    <br><br>
 
-      <div class="identifier">
-        <span style="padding-left:20px;padding-right:30px;">Category</span>
-        <span>Grade(%)</span>
-        <span style="padding-left:10px;padding-right:10px;">Weight(%)</span>
-      </div>
+    <div class="identifier">
+      <span style="padding-left:20px;padding-right:35px;">Category</span>
+      <span>Grade(%)</span>
+      <span style="padding-left:10px;padding-right:70px;">Weight(%)</span>
+    </div>
 
-      <div id="rowsHere"></div>
-      <div style="font-size:12px;width:300px;margin:auto;">*Optional: Extra credit works differently because it doesn't count as a portion of your total weight of grades. Instead, it adds it on as it is 'extra' credit.</div><br>
-      Calculated Grade:<br>
-      <span id="resGrade" style="font-weight:900;font-size:20px;">0%</span>
-      <br><br>
-      <!-- preferred grade calculator starts here -->
-      Preferred Grade Calculator:<br>
-      <input type="range" min="1" max ="100" value="90" id="slider" oninput="sliderInput()" style="width:275px;">
-      <br>
-      <span class="ui input"><input id="sliderInput" type="number" style="width:80px" value="90" oninput="sliderTextInput()"></span> %<br>
-      You must get:
-      <span id="prefGrade" style="font-weight:900;font-size:20px;">0%</span>
+    <div id="rowsHere"></div>
 
+    <div style="font-size:12px;width:300px;margin:auto;">
+      *Optional: Extra credit works differently because it doesn't count as a portion of your total weight of grades. Instead, it adds it on as it is 'extra' credit.
+    </div><br>
 
+    Calculated Grade:<br>
+    <span id="resGrade" style="font-weight:900;font-size:20px;">0%</span>
+    <br><br>
 
-    <!-- main container ends here-->
+    Preferred Grade Calculator:<br>
+    <input type="range" min="1" max="100" value="90" id="slider" style="width:275px;">
+    <br>
+    <span class="ui input"><input id="sliderInput" type="number" style="width:80px" value="90"></span> %<br>
+    You must get:
+    <span id="prefGrade" style="font-weight:900;font-size:20px;">0%</span>
   </div>
-  <br><br>
+
+  <script>
+    $(document).ready(function () {
+      createRows();
+
+      // bind global calc
+      $("#slider, #sliderInput").on("input", function () {
+        if (this.id === "slider") $("#sliderInput").val(this.value);
+        if (this.id === "sliderInput") $("#slider").val(this.value);
+        calculate();
+      });
+
+      $(document).on("input", "input", function () {
+        calculate();
+      });
+    });
+
+    function createRows() {
+      const rowsContainer = $("#rowsHere");
+
+      for (let i = 1; i < 9; i++) {
+        rowsContainer.append(`
+          <div class="category-row" data-row="${i}">
+            <span class="ui input"><input class="cat" type="text" size="10"></span>
+            <span class="ui input"><input id="grd${i}" type="number" style="width:80px"></span>
+            <span class="ui input"><input id="wgt${i}" type="number" style="width:80px"></span>
+            
+            <div class="ui checkbox">
+              <input type="checkbox" class="detail-toggle"> 
+              <label>Detailed</label>
+            </div>
+            
+            <div class="detail-inputs" style="display:none; max-width:450px; margin: auto;">
+              <div>
+                <span class="detail-cat-label">Category</span> Taken 
+                <input type="number" class="taken" style="width:60px"> /
+                Total <input type="number" class="total" style="width:60px">
+              </div>
+              <div>
+                <span class="detail-cat-label">Category</span> Target Avg: 
+                <input type="number" class="target" style="width:60px"> %
+              </div>
+              
+              <div class="ui checkbox" style="margin-top:6px;">
+                <input type="checkbox" class="use-overall">
+                <label>Use in Overall</label>
+              </div>
+              
+              <div class="needed-result"></div>
+            </div>
+          </div>
+        `);
+      }
+
+      rowsContainer.append(`
+        <div>
+          <span class="ui input">
+            <input class="cat" style="background-color:#b4f0b4;" type="text" size="10" value="Extra Credit*" readonly>
+          </span>
+          <span class="ui input"><input id="grd-ec" type="number" style="background-color:#b4f0b4;width:80px"></span>
+          <span class="ui input"><input id="wgt-ec" type="number" style="background-color:#b4f0b4;width:80px"></span>
+        </div>
+      `);
+
+      // toggle detail input visibility
+      rowsContainer.on("change", ".detail-toggle", function () {
+        const detailBox = $(this).closest(".category-row").find(".detail-inputs");
+        detailBox.toggle(this.checked);
+        calculate();
+      });
+	  
+      rowsContainer.on("input", ".taken, .total, .target", function () {
+        calculate();
+      });
+
+      rowsContainer.on("input", ".cat", function () {
+          const row = $(this).closest(".category-row");
+          const catName = $(this).val().trim() || "Category";
+          row.find(".detail-cat-label").text(catName);
+      });
+    }
+
+    function calculate() {
+      let gradeSum = 0, weightSum = 0;
+
+      $(".category-row").each(function () {
+        const row = $(this);
+        const rowNum = row.data("row");
+
+        const wgt = Number($(`#wgt${rowNum}`).val()) || 0;
+        let grd = Number($(`#grd${rowNum}`).val()) || 0;
+
+        // if detailed is checked
+        if (row.find(".detail-toggle").prop("checked")) {
+            const taken = Number(row.find(".taken").val()) || 0;
+            const total = Number(row.find(".total").val()) || 0;
+            const target = Number(row.find(".target").val()) || 0;
+
+            if (total > 0 && taken >= 0 && target > 0) {
+                const remain = total - taken;
+                const currentTotal = grd * taken;
+                const neededTotal = target * total;
+                const requiredSum = neededTotal - currentTotal;
+                const requiredAvgRemaining = remain > 0 ? requiredSum / remain : target;
+
+                // update the needed-result display
+                row.find(".needed-result").text(
+                    remain > 0
+                        ? `Need ${requiredAvgRemaining.toFixed(2)}% avg on remaining ${remain}`
+                        : `Already completed`
+                );
+
+                // only override grd for overall if the checkbox is checked
+                if (row.find(".use-overall").prop("checked")) {
+                    grd = target;
+                }
+            }
+        } else {
+            // hide the needed-result if not detailed
+            row.find(".needed-result").text('');
+        }
+
+        weightSum += wgt / 100;
+        gradeSum += grd * (wgt / 100);
+      });
+
+      const grdEC = Number($("#grd-ec").val()) || 0;
+      const wgtEC = Number($("#wgt-ec").val()) || 0;
+      const ecCalc = grdEC * (wgtEC / 100);
+
+      const finalGrade = weightSum > 0 ? (gradeSum / weightSum) : 0;
+      const finalTotal = (finalGrade + ecCalc).toFixed(2) + "%";
+
+      $("#resGrade").html(`<span style="color:${getGradeColor(finalGrade)}">${finalTotal}</span>`);
+
+      calcPref(finalGrade, weightSum, ecCalc);
+    }
+
+    function getGradeColor(grade) {
+      if (grade >= 90) return "#2a9647";
+      if (grade >= 80) return "#b8b535";
+      if (grade >= 70) return "#b88135";
+      if (grade >= 60) return "#b85635";
+      return "#b83535";
+    }
+
+    function calcPref(gradeSum, weightSum, ecCalc) {
+      const prefGrade = Number($("#sliderInput").val()) || 0;
+      const topEq = prefGrade - (gradeSum * weightSum);
+      const finalWorth = 1 - weightSum;
+      const needed = finalWorth > 0 ? (topEq / finalWorth) - ecCalc : 0;
+      $("#prefGrade").text(needed.toFixed(2) + "%");
+    }
+  </script>
 </body>
-
-
 </html>
