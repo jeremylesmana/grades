@@ -177,59 +177,73 @@
     return "#b83535";
   }
 
-  // ✅ Updated calcPref() — robust targeting + clamped grade range
   function calcPref(currentGrade, currentWeightSum) {
     const desiredOverall = Number($("#sliderInput").val()) || 0;
-
+  
     const rows = $(".category-row");
     let blankRow = null;
-    let knownSum = 0;
-    let knownWeight = 0;
+    let blankCount = 0;
+    let knownSum = 0;     // sum of (grade_percent * weight_fraction)
+    let knownWeight = 0;  // sum of weight_fraction
     let missingWeight = 0;
-
+  
     rows.each(function () {
       const row = $(this);
       const rowNum = row.data("row");
       const grdInput = $(`#grd${rowNum}`);
       const wgtInput = $(`#wgt${rowNum}`);
-
-      const grd = Number(grdInput.val());
+  
+      const grdVal = grdInput.val();
       const wgt = Number(wgtInput.val()) || 0;
-
-      if (wgt > 0 && (isNaN(grd) || grdInput.val().trim() === "")) {
-        blankRow = row;
-        missingWeight = wgt / 100;
+      const grd = grdVal !== "" ? Number(grdVal) : NaN;
+  
+      if (wgt > 0 && (isNaN(grd) || grdVal.trim() === "")) {
+        blankCount++;
+        if (!blankRow) {
+          blankRow = row;
+          missingWeight = wgt / 100; // fraction
+        }
       } else if (!isNaN(grd) && wgt > 0) {
-        knownSum += grd * (wgt / 100);
-        knownWeight += wgt / 100;
+        knownSum += grd * (wgt / 100);    // e.g. 50 * 0.33 = 16.5
+        knownWeight += wgt / 100;         // e.g. 0.33
       }
     });
-
-    if (!blankRow) {
+  
+    if (blankCount === 0) {
       $("#prefGrade").text("No blank category with a weight found.");
       return;
     }
-
-    // Formula: desired = (knownSum + x * missingWeight) / (knownWeight + missingWeight)
-    // Solve for x
-    let neededGrade = ((desiredOverall / 100) * (knownWeight + missingWeight) - knownSum) / missingWeight * 100;
-
-    // Clamp between 0–100 and message formatting
-    let msg = "";
+    if (blankCount > 1) {
+      $("#prefGrade").text("Final grade calculation only works if EXACTLY one grade is blank.");
+      return;
+    }
+    if (missingWeight <= 0) {
+      $("#prefGrade").text("Invalid missing weight.");
+      return;
+    }
+  
+    // total weight considered (fraction)
+    const totalWeight = knownWeight + missingWeight;
+  
+    // CORRECT formula (all units consistent):
+    // desiredOverall (percent) = (knownSum + x * missingWeight) / totalWeight
+    // solve for x (percent):
+    let neededGrade = (desiredOverall * totalWeight - knownSum) / missingWeight;
+  
     const catName = blankRow.find(".cat").val().trim() || "missing category";
-
+    let msg = "";
+  
     if (neededGrade > 100) {
       msg = `You’d need more than 100% (${neededGrade.toFixed(2)}%) in ${catName} — might not be possible.`;
-      neededGrade = 100;
     } else if (neededGrade < 0) {
       msg = `You’ve already secured enough points for your ${desiredOverall}% goal! 🎉`;
-      neededGrade = 0;
     } else {
       msg = `You need ${neededGrade.toFixed(2)}% in your ${catName} to reach a ${desiredOverall}% overall grade.`;
     }
-
+  
     $("#prefGrade").text(msg);
   }
+
 </script>
 
 </body>
