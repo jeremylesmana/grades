@@ -71,6 +71,15 @@
       $(document).on("input", "input", function () {
         calculate();
       });
+
+      $(document).on("change", ".detail-toggle", function () {
+        const details = $(this).closest(".category-row").find(".detail-inputs");
+        if ($(this).prop("checked")) {
+          details.slideDown(150);
+        } else {
+          details.slideUp(150);
+        }
+      });
     });
 
     function addRow() {
