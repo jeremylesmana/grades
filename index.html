@@ -1,27 +1,19 @@
 <html>
 <head>
   <title>Grade Calculator</title>
-  <script src="jquery-3.5.1.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link async rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
-  <script async src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 
   <style>
-    /* For Chrome, Safari, Edge, and Opera */
     input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0; /* Important to remove extra space */
-    }
-
-    /* For Firefox */
-    input[type=number] {
-      -moz-appearance: textfield;
-    }
+    input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
 
     .detail-inputs { margin-top: 6px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; }
     .needed-result { margin-top: 6px; font-weight: 600; }
+    .add-row-btn { margin-top: 10px; }
   </style>
 </head>
 
@@ -29,47 +21,36 @@
   <br>
   <div class="ui segment text container center aligned">
     <h2 class="ui header">Grade Calculator</h2>
-    <span>Created by Jeremy Lesmana</span>
-    <div style="font-size:12px;margin:auto;font-weight: 600;">
-      <a style="color: #966F33;padding: 10px;" href="https://buymeacoffee.com/jeremylesmana" target="_blank">Buy me coffee</a>
-      <a style="color: #336196;padding: 10px;" href="https://www.linkedin.com/in/jeremylesmana/" target="_blank">LinkedIn</a>
-    </div><br>
-    <div style="font-size:12px;max-width:450px;margin:auto;">
-      You can enter decimals at all fields.<br>Grade and weight are percentages (%).
-    </div><br>
-
+    <span>Created by Jeremy Lesmana</span><br><br>
+    
     <div id="rowsHere"></div>
+    <button id="addRowBtn" class="ui green button add-row-btn">+ Add Row</button><br><br>
 
     <div style="font-size:12px;max-width:450px;margin:auto;">
-      *Optional: Extra credit works differently because it doesn't count as a portion of your total weight of grades. Instead, it adds it on as it is 'extra' credit.
+      *Optional: Extra credit works differently because it doesn't count as a portion of your total weight of grades.
     </div><br>
 
     Class Overall Grade:<br>
-    <span id="resGrade" style="font-weight:900;font-size:32px;">0%</span>
-    <br><br>
+    <span id="resGrade" style="font-weight:900;font-size:32px;">0%</span><br><br>
 
-    
     Final Grade Calculator:<br>
     <input type="range" min="1" max="100" value="90" id="slider" style="width:200px;"><br>
     <span class="ui input"><input id="sliderInput" type="number" style="width:70px" value="90"></span> % Desired Overall Grade<br><br>
-    <div style="font-size:12px;max-width:450px;margin:auto;">
-      You can use the final grade calculator to calculate what grade you need your remaining assignments to receive a desired overall grade.
-      For example, if you want to calculate what you need on your Final Exam to get an A in the class, you can do so! Just fill in all the categories
-      and make sure the weights total to 100%, and leave your last category grade blank (eg. Final Exam).
-    </div><br>
+
     <span id="prefGrade" style="font-weight:900;font-size:16px;"></span>
   </div><br>
-  
-  <div style="text-align: center;">
-    <img src="https://static.wikia.nocookie.net/sumikko-gurashi/images/6/69/Tokage.jpeg" width="50px"><br>
-    Made mainly for Anne. You got this!
-  </div><br><br>
 
   <script>
-    $(document).ready(function () {
-      createRows();
+    let rowCount = 0;
 
-      // bind global calc
+    $(document).ready(function () {
+      for (let i = 1; i <= 3; i++) addRow(); // start with a few rows
+
+      $("#addRowBtn").on("click", function () {
+        addRow();
+        calculate();
+      });
+
       $("#slider, #sliderInput").on("input", function () {
         if (this.id === "slider") $("#sliderInput").val(this.value);
         if (this.id === "sliderInput") $("#slider").val(this.value);
@@ -81,135 +62,87 @@
       });
     });
 
-    function createRows() {
-      const rowsContainer = $("#rowsHere");
+    function addRow() {
+      rowCount++;
+      const rowHTML = `
+        <div class="category-row" data-row="${rowCount}" style="padding-top:7px; padding-bottom:7px;">
+          <span class="ui input"><input class="cat" type="text" placeholder="Category" style="width:140px; font-size:14px;"></span>
+          <span class="ui input"><input id="grd${rowCount}" type="number" placeholder="Grade" style="width:80px; font-size:14px;"></span>
+          <span class="ui input"><input id="wgt${rowCount}" type="number" placeholder="Weight" style="width:80px; font-size:14px;"></span>
 
-      for (let i = 1; i < 9; i++) {
-        rowsContainer.append(`
-          <div class="category-row" data-row="${i}" style="padding-top:7px; padding-bottom:7px;">
-            <span class="ui input"><input class="cat" type="text" placeholder="Category" style="width:140px; font-size:14px;"></span>
-            <span class="ui input"><input id="grd${i}" type="number" placeholder="Grade" style="width:80px; font-size:14px;"></span>
-            <span class="ui input"><input id="wgt${i}" type="number" placeholder="Weight" style="width:80px; font-size:14px;"></span>
-            
-            <div class="ui checkbox">
-              <input type="checkbox" class="detail-toggle"> 
-              <label>Detailed</label>
-            </div><br>
-            
-            <div class="detail-inputs" style="display:none; max-width:450px; margin: auto;">
-              <div>
-                <span class="detail-cat-label">Category</span> Completed 
-                <input type="number" class="taken" style="width:60px"> /
-                <input type="number" class="total" style="width:60px"> Total
-              </div>
-              <div>
-                <span class="detail-cat-label">Category</span> Target Avg: 
-                <input type="number" class="target" style="width:60px"> %
-              </div>
-              
-              <div class="ui checkbox" style="margin-top:6px;">
-                <input type="checkbox" class="use-overall">
-                <label>Use target avg. instead of actual in calculation</label>
-              </div>
-              
-              <div class="needed-result"></div>
+          <div class="ui checkbox">
+            <input type="checkbox" class="detail-toggle"> 
+            <label>Detailed</label>
+          </div><br>
+
+          <div class="detail-inputs" style="display:none; max-width:450px; margin: auto;">
+            <div>
+              <span class="detail-cat-label">Category</span> Completed 
+              <input type="number" class="taken" style="width:60px"> /
+              <input type="number" class="total" style="width:60px"> Total
             </div>
+            <div>
+              <span class="detail-cat-label">Category</span> Target Avg: 
+              <input type="number" class="target" style="width:60px"> %
+            </div>
+            <div class="ui checkbox" style="margin-top:6px;">
+              <input type="checkbox" class="use-overall">
+              <label>Use target avg. instead of actual in calculation</label>
+            </div>
+            <div class="needed-result"></div>
           </div>
-        `);
-      }
-
-      rowsContainer.append(`
-        <br><div>
-          <span class="ui input"><input class="cat" style="background-color:#b4f0b4;font-size:14px;" type="text" size="10" value="Extra Credit*" readonly></span>
-          <span class="ui input"><input id="grd-ec" type="number" placeholder="Grade" style="font-size:14px;background-color:#b4f0b4;width:80px"></span>
-          <span class="ui input"><input id="wgt-ec" type="number" placeholder="Weight" style="font-size:14px;background-color:#b4f0b4;width:80px"></span>
         </div>
-      `);
-
-      // toggle detail input visibility
-      rowsContainer.on("change", ".detail-toggle", function () {
-        const detailBox = $(this).closest(".category-row").find(".detail-inputs");
-        detailBox.toggle(this.checked);
-        calculate();
-      });
-	  
-      rowsContainer.on("input", ".taken, .total, .target", function () {
-        calculate();
-      });
-
-      rowsContainer.on("input", ".cat", function () {
-          const row = $(this).closest(".category-row");
-          const catName = $(this).val().trim();
-          row.find(".detail-cat-label").text(catName);
-      });
+      `;
+      $("#rowsHere").append(rowHTML);
     }
 
     function calculate() {
-        let gradeSum = 0, weightSum = 0;
+      let gradeSum = 0, weightSum = 0;
 
-        $(".category-row").each(function () {
-            const row = $(this);
-            const rowNum = row.data("row");
+      $(".category-row").each(function () {
+        const row = $(this);
+        const rowNum = row.data("row");
+        let grdVal = $(`#grd${rowNum}`).val();
+        let wgtVal = $(`#wgt${rowNum}`).val();
 
-            // Get grade and weight values
-            let grdVal = $(`#grd${rowNum}`).val();
-            let wgtVal = $(`#wgt${rowNum}`).val();
+        let grd = grdVal !== "" ? Number(grdVal) : null;
+        let wgt = wgtVal !== "" ? Number(wgtVal) : null;
 
-            let grd = grdVal !== "" ? Number(grdVal) : null;
-            let wgt = wgtVal !== "" ? Number(wgtVal) : null;
+        if (grd !== null && wgt !== null && !isNaN(grd) && !isNaN(wgt) && wgt > 0) {
+          if (row.find(".detail-toggle").prop("checked")) {
+            const taken = Number(row.find(".taken").val()) || 0;
+            const total = Number(row.find(".total").val()) || 0;
+            const target = Number(row.find(".target").val()) || 0;
 
-            // Only calculate if BOTH grade and weight are filled and valid
-            if (grd !== null && wgt !== null && !isNaN(grd) && !isNaN(wgt) && wgt > 0) {
+            if (total > 0 && taken >= 0 && target > 0) {
+              const remain = total - taken;
+              const currentTotal = grd * taken;
+              const neededTotal = target * total;
+              const requiredSum = neededTotal - currentTotal;
+              const requiredAvgRemaining = remain > 0 ? requiredSum / remain : target;
 
-                // Detailed override logic
-                if (row.find(".detail-toggle").prop("checked")) {
-                    const taken = Number(row.find(".taken").val()) || 0;
-                    const total = Number(row.find(".total").val()) || 0;
-                    const target = Number(row.find(".target").val()) || 0;
+              row.find(".needed-result").text(
+                remain > 0
+                  ? `Need ${requiredAvgRemaining.toFixed(2)}% avg on remaining ${remain}`
+                  : `Already completed`
+              );
 
-                    if (total > 0 && taken >= 0 && target > 0) {
-                        const remain = total - taken;
-                        const currentTotal = grd * taken;
-                        const neededTotal = target * total;
-                        const requiredSum = neededTotal - currentTotal;
-                        const requiredAvgRemaining = remain > 0 ? requiredSum / remain : target;
-
-                        row.find(".needed-result").text(
-                            remain > 0
-                                ? `Need ${requiredAvgRemaining.toFixed(2)}% avg on remaining ${remain}`
-                                : `Already completed`
-                        );
-
-                        if (row.find(".use-overall").prop("checked")) {
-                            grd = target;
-                        }
-                    }
-                } else {
-                    row.find(".needed-result").text('');
-                }
-
-                // Add to totals
-                weightSum += wgt / 100;
-                gradeSum += grd * (wgt / 100);
+              if (row.find(".use-overall").prop("checked")) grd = target;
             }
-        });
+          } else {
+            row.find(".needed-result").text('');
+          }
 
-        // Extra Credit
-        const grdECVal = $("#grd-ec").val();
-        const wgtECVal = $("#wgt-ec").val();
-        const grdEC = grdECVal !== "" ? Number(grdECVal) : 0;
-        const wgtEC = wgtECVal !== "" ? Number(wgtECVal) : 0;
-        const ecCalc = grdEC * (wgtEC / 100);
+          weightSum += wgt / 100;
+          gradeSum += grd * (wgt / 100);
+        }
+      });
 
-        const finalGrade = weightSum > 0 ? (gradeSum / weightSum) : 0;
-        const finalTotal = (finalGrade + ecCalc).toFixed(2) + "%";
+      const finalGrade = weightSum > 0 ? (gradeSum / weightSum) : 0;
+      $("#resGrade").html(`<span style="color:${getGradeColor(finalGrade)}">${finalGrade.toFixed(2)}%</span>`);
 
-        $("#resGrade").html(`<span style="color:${getGradeColor(finalGrade)}">${finalTotal}</span>`);
-
-        // Update preferred grade calculation
-        calcPref(finalGrade, weightSum, ecCalc);
+      calcPref(finalGrade, weightSum);
     }
-
 
     function getGradeColor(grade) {
       if (grade >= 90) return "#2a9647";
@@ -219,67 +152,48 @@
       return "#b83535";
     }
 
-    function calcPref(gradeSum, weightSum, ecCalc) {
-        const prefGrade = Number($("#sliderInput").val()) || 0;
+    // UPDATED calcPref() – works even if total weight != 100%
+    function calcPref(currentGrade, currentWeightSum) {
+      const desiredOverall = Number($("#sliderInput").val()) || 0;
 
-        const rows = $(".category-row");
-        let blankRows = [];
-        let filledGradeSum = 0;
-        let totalWeight = 0;
+      const rows = $(".category-row");
+      let blankRow = null;
+      let knownSum = 0;
+      let knownWeight = 0;
+      let missingWeight = 0;
 
-        // Loop through all rows
-        rows.each(function () {
-            const row = $(this);
-            const grdInput = row.find("input[type=number]").eq(0); // grade input
-            const wgtInput = row.find("input[type=number]").eq(1); // weight input
-            const targetInput = row.find(".target");
-            const useOverall = row.find(".use-overall").prop("checked");
+      rows.each(function () {
+        const row = $(this);
+        const grdInput = row.find("input[type=number]").eq(0);
+        const wgtInput = row.find("input[type=number]").eq(1);
 
-            let grd = Number(grdInput.val());
-            const wgt = Number(wgtInput.val()) || 0;
+        const grd = Number(grdInput.val());
+        const wgt = Number(wgtInput.val()) || 0;
 
-            totalWeight += wgt / 100;
-
-            // If the "use target average for overall" is checked, override grd with target
-            if (useOverall && targetInput.length) {
-                const target = Number(targetInput.val()) || 0;
-                grd = target;
-            }
-
-            // Determine blank rows for final grade calculation
-            if (wgt > 0 && (!grd || isNaN(grd))) {
-                blankRows.push(row);
-            } else if (grd && !isNaN(grd)) {
-                filledGradeSum += grd * (wgt / 100);
-            }
-        });
-
-        // Check conditions
-        if (totalWeight !== 1) {
-            $("#prefGrade").text("Final grade calculation only works if TOTAL SUM of WEIGHTS are 100%.");
-            return;
+        if (wgt > 0 && (isNaN(grd) || grdInput.val().trim() === "")) {
+          blankRow = row;
+          missingWeight = wgt / 100;
+        } else if (!isNaN(grd) && wgt > 0) {
+          knownSum += grd * (wgt / 100);
+          knownWeight += wgt / 100;
         }
+      });
 
-        if (blankRows.length === 0) {
-            $("#prefGrade").text("All grades are filled; final grade calculation not needed.");
-            return;
-        }
+      if (!blankRow) {
+        $("#prefGrade").text("No blank category with a weight found.");
+        return;
+      }
 
-        if (blankRows.length > 1) {
-            $("#prefGrade").text("Final grade calculation only works if EXACTLY one grade is blank.");
-            return;
-        }
+      // Formula:
+      // desired = (knownSum + x * missingWeight) / (knownWeight + missingWeight)
+      // Solve for x
+      const neededGrade = ((desiredOverall / 100) * (knownWeight + missingWeight) - knownSum) / missingWeight;
 
-        // Only one blank grade — calculate needed grade
-        const blankRow = blankRows[0];
-        const blankWeight = Number(blankRow.find("input[type=number]").eq(1).val()) / 100;
-        const needed = (prefGrade - filledGradeSum - ecCalc) / blankWeight;
+      const catName = blankRow.find(".cat").val().trim() || "missing category";
 
-        const catName = blankRow.find(".cat").val().trim() || "missing";
-
-        $("#prefGrade").text(
-            `You must get ${needed.toFixed(2)}% on your ${catName} category to get ${prefGrade}% overall grade.`
-        );
+      $("#prefGrade").text(
+        `You need ${neededGrade.toFixed(2)}% in your ${catName} to reach a ${desiredOverall}% overall grade.`
+      );
     }
   </script>
 </body>
