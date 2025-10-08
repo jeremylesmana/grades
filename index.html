@@ -52,169 +52,185 @@
   </div><br><br>
   
   <script>
-    let rowCount = 0;
+  let rowCount = 0;
 
-    $(document).ready(function () {
-      for (let i = 1; i <= 3; i++) addRow(); // start with a few rows
+  $(document).ready(function () {
+    for (let i = 1; i <= 3; i++) addRow(); // start with a few rows
 
-      $("#addRowBtn").on("click", function () {
-        addRow();
-        calculate();
-      });
-
-      $("#slider, #sliderInput").on("input", function () {
-        if (this.id === "slider") $("#sliderInput").val(this.value);
-        if (this.id === "sliderInput") $("#slider").val(this.value);
-        calculate();
-      });
-
-      $(document).on("input", "input", function () {
-        calculate();
-      });
-
-      $(document).on("change", ".detail-toggle", function () {
-        const details = $(this).closest(".category-row").find(".detail-inputs");
-        if ($(this).prop("checked")) {
-          details.slideDown(150);
-        } else {
-          details.slideUp(150);
-        }
-      });
+    $("#addRowBtn").on("click", function () {
+      addRow();
+      calculate();
     });
 
-    function addRow() {
-      rowCount++;
-      const rowHTML = `
-        <div class="category-row" data-row="${rowCount}" style="padding-top:7px; padding-bottom:7px;">
-          <span class="ui input"><input class="cat" type="text" placeholder="Category" style="width:140px; font-size:14px;"></span>
-          <span class="ui input"><input id="grd${rowCount}" type="number" placeholder="Grade" style="width:80px; font-size:14px;"></span>
-          <span class="ui input"><input id="wgt${rowCount}" type="number" placeholder="Weight" style="width:80px; font-size:14px;"></span>
+    $("#slider, #sliderInput").on("input", function () {
+      if (this.id === "slider") $("#sliderInput").val(this.value);
+      if (this.id === "sliderInput") $("#slider").val(this.value);
+      calculate();
+    });
 
-          <div class="ui checkbox">
-            <input type="checkbox" class="detail-toggle"> 
-            <label>Detailed</label>
-          </div><br>
+    $(document).on("input", "input", function () {
+      calculate();
+    });
 
-          <div class="detail-inputs" style="display:none; max-width:450px; margin: auto;">
-            <div>
-              <span class="detail-cat-label">Category</span> Completed 
-              <input type="number" class="taken" style="width:60px"> /
-              <input type="number" class="total" style="width:60px"> Total
-            </div>
-            <div>
-              <span class="detail-cat-label">Category</span> Target Avg: 
-              <input type="number" class="target" style="width:60px"> %
-            </div>
-            <div class="ui checkbox" style="margin-top:6px;">
-              <input type="checkbox" class="use-overall">
-              <label>Use target avg. instead of actual in calculation</label>
-            </div>
-            <div class="needed-result"></div>
-          </div>
-        </div>
-      `;
-      $("#rowsHere").append(rowHTML);
-    }
-
-    function calculate() {
-      let gradeSum = 0, weightSum = 0;
-
-      $(".category-row").each(function () {
-        const row = $(this);
-        const rowNum = row.data("row");
-        let grdVal = $(`#grd${rowNum}`).val();
-        let wgtVal = $(`#wgt${rowNum}`).val();
-
-        let grd = grdVal !== "" ? Number(grdVal) : null;
-        let wgt = wgtVal !== "" ? Number(wgtVal) : null;
-
-        if (grd !== null && wgt !== null && !isNaN(grd) && !isNaN(wgt) && wgt > 0) {
-          if (row.find(".detail-toggle").prop("checked")) {
-            const taken = Number(row.find(".taken").val()) || 0;
-            const total = Number(row.find(".total").val()) || 0;
-            const target = Number(row.find(".target").val()) || 0;
-
-            if (total > 0 && taken >= 0 && target > 0) {
-              const remain = total - taken;
-              const currentTotal = grd * taken;
-              const neededTotal = target * total;
-              const requiredSum = neededTotal - currentTotal;
-              const requiredAvgRemaining = remain > 0 ? requiredSum / remain : target;
-
-              row.find(".needed-result").text(
-                remain > 0
-                  ? `Need ${requiredAvgRemaining.toFixed(2)}% avg on remaining ${remain}`
-                  : `Already completed`
-              );
-
-              if (row.find(".use-overall").prop("checked")) grd = target;
-            }
-          } else {
-            row.find(".needed-result").text('');
-          }
-
-          weightSum += wgt / 100;
-          gradeSum += grd * (wgt / 100);
-        }
-      });
-
-      const finalGrade = weightSum > 0 ? (gradeSum / weightSum) : 0;
-      $("#resGrade").html(`<span style="color:${getGradeColor(finalGrade)}">${finalGrade.toFixed(2)}%</span>`);
-
-      calcPref(finalGrade, weightSum);
-    }
-
-    function getGradeColor(grade) {
-      if (grade >= 90) return "#2a9647";
-      if (grade >= 80) return "#b8b535";
-      if (grade >= 70) return "#b88135";
-      if (grade >= 60) return "#b85635";
-      return "#b83535";
-    }
-
-    // UPDATED calcPref() – works even if total weight != 100%
-    function calcPref(currentGrade, currentWeightSum) {
-      const desiredOverall = Number($("#sliderInput").val()) || 0;
-
-      const rows = $(".category-row");
-      let blankRow = null;
-      let knownSum = 0;
-      let knownWeight = 0;
-      let missingWeight = 0;
-
-      rows.each(function () {
-        const row = $(this);
-        const grdInput = row.find("input[type=number]").eq(0);
-        const wgtInput = row.find("input[type=number]").eq(1);
-
-        const grd = Number(grdInput.val());
-        const wgt = Number(wgtInput.val()) || 0;
-
-        if (wgt > 0 && (isNaN(grd) || grdInput.val().trim() === "")) {
-          blankRow = row;
-          missingWeight = wgt / 100;
-        } else if (!isNaN(grd) && wgt > 0) {
-          knownSum += grd * (wgt / 100);
-          knownWeight += wgt / 100;
-        }
-      });
-
-      if (!blankRow) {
-        $("#prefGrade").text("No blank category with a weight found.");
-        return;
+    $(document).on("change", ".detail-toggle", function () {
+      const details = $(this).closest(".category-row").find(".detail-inputs");
+      if ($(this).prop("checked")) {
+        details.slideDown(150);
+      } else {
+        details.slideUp(150);
       }
+    });
 
-      // Formula:
-      // desired = (knownSum + x * missingWeight) / (knownWeight + missingWeight)
-      // Solve for x
-      const neededGrade = ((desiredOverall / 100) * (knownWeight + missingWeight) - knownSum) / missingWeight;
+    // Initialize Semantic UI checkboxes for styling
+    $(document).on("click", ".ui.checkbox", function() {
+      $(this).checkbox();
+    });
+  });
 
-      const catName = blankRow.find(".cat").val().trim() || "missing category";
+  function addRow() {
+    rowCount++;
+    const rowHTML = `
+      <div class="category-row" data-row="${rowCount}" style="padding-top:7px; padding-bottom:7px;">
+        <span class="ui input"><input class="cat" type="text" placeholder="Category" style="width:140px; font-size:14px;"></span>
+        <span class="ui input"><input id="grd${rowCount}" type="number" placeholder="Grade" style="width:80px; font-size:14px;" min="0" max="100"></span>
+        <span class="ui input"><input id="wgt${rowCount}" type="number" placeholder="Weight" style="width:80px; font-size:14px;" min="0" max="100"></span>
 
-      $("#prefGrade").text(
-        `You need ${neededGrade.toFixed(2)}% in your ${catName} to reach a ${desiredOverall}% overall grade.`
-      );
+        <div class="ui checkbox">
+          <input type="checkbox" class="detail-toggle"> 
+          <label>Detailed</label>
+        </div><br>
+
+        <div class="detail-inputs" style="display:none; max-width:450px; margin: auto;">
+          <div>
+            <span class="detail-cat-label">Category</span> Completed 
+            <input type="number" class="taken" style="width:60px"> /
+            <input type="number" class="total" style="width:60px"> Total
+          </div>
+          <div>
+            <span class="detail-cat-label">Category</span> Target Avg: 
+            <input type="number" class="target" style="width:60px"> %
+          </div>
+          <div class="ui checkbox" style="margin-top:6px;">
+            <input type="checkbox" class="use-overall">
+            <label>Use target avg. instead of actual in calculation</label>
+          </div>
+          <div class="needed-result"></div>
+        </div>
+      </div>
+    `;
+    $("#rowsHere").append(rowHTML);
+  }
+
+  function calculate() {
+    let gradeSum = 0, weightSum = 0;
+
+    $(".category-row").each(function () {
+      const row = $(this);
+      const rowNum = row.data("row");
+      const grdInput = $(`#grd${rowNum}`);
+      const wgtInput = $(`#wgt${rowNum}`);
+
+      let grd = grdInput.val() !== "" ? Number(grdInput.val()) : null;
+      let wgt = wgtInput.val() !== "" ? Number(wgtInput.val()) : null;
+
+      if (grd !== null && wgt !== null && !isNaN(grd) && !isNaN(wgt) && wgt > 0) {
+        if (row.find(".detail-toggle").prop("checked")) {
+          const taken = Number(row.find(".taken").val()) || 0;
+          const total = Number(row.find(".total").val()) || 0;
+          const target = Number(row.find(".target").val()) || 0;
+
+          if (total > 0 && taken >= 0 && target > 0) {
+            const remain = total - taken;
+            const currentTotal = (grd / 100) * taken;
+            const neededTotal = (target / 100) * total;
+            const requiredSum = neededTotal - currentTotal;
+            const requiredAvgRemaining = remain > 0 ? (requiredSum / remain) * 100 : target;
+
+            row.find(".needed-result").text(
+              remain > 0
+                ? `Need ${requiredAvgRemaining.toFixed(2)}% avg on remaining ${remain}`
+                : `Already completed`
+            );
+
+            if (row.find(".use-overall").prop("checked")) grd = target;
+          }
+        } else {
+          row.find(".needed-result").text('');
+        }
+
+        weightSum += wgt / 100;
+        gradeSum += grd * (wgt / 100);
+      }
+    });
+
+    const finalGrade = weightSum > 0 ? (gradeSum / weightSum) : 0;
+    $("#resGrade").html(`<span style="color:${getGradeColor(finalGrade)}">${finalGrade.toFixed(2)}%</span>`);
+
+    calcPref(finalGrade, weightSum);
+  }
+
+  function getGradeColor(grade) {
+    if (grade >= 90) return "#2a9647";
+    if (grade >= 80) return "#b8b535";
+    if (grade >= 70) return "#b88135";
+    if (grade >= 60) return "#b85635";
+    return "#b83535";
+  }
+
+  // ✅ Updated calcPref() — robust targeting + clamped grade range
+  function calcPref(currentGrade, currentWeightSum) {
+    const desiredOverall = Number($("#sliderInput").val()) || 0;
+
+    const rows = $(".category-row");
+    let blankRow = null;
+    let knownSum = 0;
+    let knownWeight = 0;
+    let missingWeight = 0;
+
+    rows.each(function () {
+      const row = $(this);
+      const rowNum = row.data("row");
+      const grdInput = $(`#grd${rowNum}`);
+      const wgtInput = $(`#wgt${rowNum}`);
+
+      const grd = Number(grdInput.val());
+      const wgt = Number(wgtInput.val()) || 0;
+
+      if (wgt > 0 && (isNaN(grd) || grdInput.val().trim() === "")) {
+        blankRow = row;
+        missingWeight = wgt / 100;
+      } else if (!isNaN(grd) && wgt > 0) {
+        knownSum += grd * (wgt / 100);
+        knownWeight += wgt / 100;
+      }
+    });
+
+    if (!blankRow) {
+      $("#prefGrade").text("No blank category with a weight found.");
+      return;
     }
-  </script>
+
+    // Formula: desired = (knownSum + x * missingWeight) / (knownWeight + missingWeight)
+    // Solve for x
+    let neededGrade = ((desiredOverall / 100) * (knownWeight + missingWeight) - knownSum) / missingWeight * 100;
+
+    // Clamp between 0–100 and message formatting
+    let msg = "";
+    const catName = blankRow.find(".cat").val().trim() || "missing category";
+
+    if (neededGrade > 100) {
+      msg = `You’d need more than 100% (${neededGrade.toFixed(2)}%) in ${catName} — might not be possible.`;
+      neededGrade = 100;
+    } else if (neededGrade < 0) {
+      msg = `You’ve already secured enough points for your ${desiredOverall}% goal! 🎉`;
+      neededGrade = 0;
+    } else {
+      msg = `You need ${neededGrade.toFixed(2)}% in your ${catName} to reach a ${desiredOverall}% overall grade.`;
+    }
+
+    $("#prefGrade").text(msg);
+  }
+</script>
+
 </body>
 </html>
